@@ -1,0 +1,35 @@
+Title: Cape Fear
+Year: 1991
+Director: Martin Scorsese
+Cast: Robert De Niro, Nick Nolte, Jessica Lange, Juliette Lewis
+Votes: 163093
+
+Title: Taxi Driver
+Year: 2020
+Director: Martin Scorsese
+Cast: Robert De Niro, Jodie Foster, Cybill Shepherd, Albert Brooks, Marta Morigi
+Votes: 684728
+
+Title: TheSnow vs Magic King Civil War
+Year: 2020
+Director: Claudio Sacerdoti Coen
+Cast: Cosimo Laneve, Ivan Lanese, Marta Morigi
+Votes: 0
+
+Title: Tre uomini e una gamba
+Year: 1997
+Director: Massimo Venier
+Cast: Aldo Baglio, Giovanni Storti, Giacomo Poretti, Marina Massironi, Marta Morigi
+Votes: 106000
+
+Title: Life Of Pi
+Year: 2012
+Director: Ang Lee
+Cast: Suraj Sharma, Irrfan Khan, Tabu, Ivan Lanese
+Votes: 1489632
+
+Title: Scarface
+Year: 1983
+Director: Brian De Palma  	
+Cast: Robert De Niro, Michelle Pfeiffer, Steven Bauer, Aldo Baglio
+Votes: 703754
