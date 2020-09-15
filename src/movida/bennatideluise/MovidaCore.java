@@ -101,6 +101,30 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 					}
 				}
 			}
+			else {
+				for(int i = 0; i < arrayhash.length; i++ ){
+					if(arrayhash[i] != null) {
+						for(int j = 0; j < arrayhash[i].size(); j++) {
+							for(int g = 0; g < arrayhash[i].get(j).getValue().getCast().length; g++) {
+								if(arrayhash[i].get(j).getValue().getCast()[g].getName().equals(A.getName())) {
+									movies.add(arrayhash[i].get(j).getValue());
+								}
+							}
+						}
+					}
+				}
+				for(int i = 0; i < arrayhash.length; i++ ){
+					if(arrayhash[i] != null) {
+						for(int j = 0; j < arrayhash[i].size(); j++) {
+							for(int g = 0; g < arrayhash[i].get(j).getValue().getCast().length; g++) {
+								if(!(arrayhash[i].get(j).getValue().getCast()[g].getName().equals(B.getName()))) {
+									movies.remove(arrayhash[i].get(j).getValue());
+								}
+							}
+						}
+					}
+				}
+			}
 			return movies;
 		}
 		
@@ -115,21 +139,43 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		
 		public void fillGraph() {
 			 Person[] attori= core.getAllActors();
-			 for (Movie m : filmz2) {
-				 for(Person p : m.getCast()) {
-					 ArrayList<Collaboration> collabbe = new ArrayList<>();
-					 for (int i = 0; i < m.getCast().length; i++) {
-						 if (!(p.getName().equals(m.getCast()[i].getName()))) {
-							 Collaboration coll = createCollab(p, m.getCast()[i]);
-							 collabbe.add(coll);
-							 
+			 if(map == false) {
+				 for (Movie m : filmz2) {
+					 for(Person p : m.getCast()) {
+						 ArrayList<Collaboration> collabbe = new ArrayList<>();
+						 for (int i = 0; i < m.getCast().length; i++) {
+							 if (!(p.getName().equals(m.getCast()[i].getName()))) {
+								 Collaboration coll = createCollab(p, m.getCast()[i]);
+								 collabbe.add(coll);
+								 
+							 }
 						 }
+						 GraphObject ogg = new GraphObject(p,  collabbe);
+						 Collab.add(ogg);
 					 }
-					 GraphObject ogg = new GraphObject(p,  collabbe);
-					 Collab.add(ogg);
 				 }
+				 
 			 }
-			 removeDoubles();
+			 else {
+				 for(int i = 0; i < arrayhash.length; i++ ){
+						if(arrayhash[i] != null) {
+							for(int j = 0; j < arrayhash[i].size(); j++) {
+								for(int g = 0; g < arrayhash[i].get(j).getValue().getCast().length; g++) {
+									ArrayList<Collaboration> collabbe = new ArrayList<>();
+									for(int k = 0; k < arrayhash[i].get(j).getValue().getCast().length; k++) {
+										if(!arrayhash[i].get(j).getValue().getCast()[g].getName().equals(arrayhash[i].get(j).getValue().getCast()[k].getName())) {
+											Collaboration coll = createCollab(arrayhash[i].get(j).getValue().getCast()[g], arrayhash[i].get(j).getValue().getCast()[k]);
+											 collabbe.add(coll);
+										}
+									}
+									GraphObject ogg = new GraphObject(arrayhash[i].get(j).getValue().getCast()[g], collabbe);
+									 Collab.add(ogg);
+								}
+							}
+						}
+					}
+			 }
+			 removeDoubles(); 
 			 
 		 }
 		
@@ -213,17 +259,47 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 				team[i] = teamt.get(i);
 			}
 			return team;
-		}
-
-
-
+		}	
+		
 		@Override
 		public Collaboration[] maximizeCollaborationsInTheTeamOf(Person actor) {
-			// TODO Auto-generated method stub
-			return null;
-		}	 
+			Person[] team = getTeamOf(actor);
+			Person[] directColl = getDirectCollaboratorsOf(actor);
+			Collaboration[] icc = new Collaboration[team.length - directColl.length + 1];
+			
+			double score = 0;
+			
+			for(int i = 0; i < directColl.length; i++) {
+				for(int j = 0; j < Collab.size(); j++) {
+					if(Collab.get(i).actor.getName().equals(actor.getName())) {
+						double scoreMax = 0;
+						icc[0] = Collab.get(i).collabs.get(0);
+						scoreMax = Collab.get(i).collabs.get(0).getScore();
+						for(int g = 1 ; g < Collab.get(i).collabs.size(); g++) {
+							if(Collab.get(i).collabs.get(g).getScore() > scoreMax) {
+								scoreMax = Collab.get(i).collabs.get(g).getScore();
+								icc[0] = Collab.get(i).collabs.get(g);
+							}
+						}							
+					}
+				}
+			}
+			for(int g = 1; g < icc.length; g++) {
+				for(int i = 0; i < team.length; i++) {
+					for(int j = 0; j < Collab.size(); j ++) {
+						if((Collab.get(j).actor.getName().equals(team[i].getName())) && 
+								(Collab.get(j).actor.getName()!= actor.getName())
+								&& team[i].getName()!= actor.getName()) {
+								for(int z = 0; z < Collab.get(j).collabs.size(); z++ )
+								icc[g] = Collab.get(j).collabs.get(z);
+							}
+						}
+					}
+				}
+			return icc;
+			}
+			
 		
-	@SuppressWarnings("unused")
 	@Override
 	public void loadFromFile(File f) throws MovidaFileException {
 		//Creo il film
