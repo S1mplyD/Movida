@@ -17,49 +17,48 @@ import movida.commons.*;
 import java.util.*;
 
 public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMovidaCollaborations{
-	
+	//oggetto della tabella hash
 	public class oggettoHash{
 			
-			private Movie valore;
+			private Movie valore; 
 			private int chiave;
 			public oggettoHash(Movie valore, int chiave) {
 				this.chiave = chiave;
 				this.valore = valore;
 			}
-			
+			//funzione che ritorna il valore della tabella hash
 			public Movie getValue() {
 				return this.valore;
 			}
 		}
+	//oggetto grafo contenente attore e collaborazioni
 	public class GraphObject{
 		Person actor;
-		ArrayList<Collaboration> collabs;
+		ArrayList<Collaboration> collabs;	//array di collaborazioni
 		public GraphObject(Person att, ArrayList<Collaboration> col) {
 			this.actor = att;
 			this.collabs = col;
 		}
 	}
 
-	static LinkedList<GraphObject> Collab;
-	public static final int ARR_SIZE = 10;
-	Movie[] filmz = new Movie[ARR_SIZE];
-	LinkedList<oggettoHash>[] arrayhash = new LinkedList[ARR_SIZE];
-	Movie[] filmz2 = null;
+	static LinkedList<GraphObject> Collab;	//Grafo delle collaborazioni
+	public static final int ARR_SIZE = 10;	
+	Movie[] filmz = new Movie[ARR_SIZE];	//array di film iniziale
+	LinkedList<oggettoHash>[] arrayhash = new LinkedList[ARR_SIZE];	//tabella hash di film
+	Movie[] filmz2 = null;	//array di film trimmato
 	//false = Bubblesort, true = quicksort
 	boolean algo = false;
 	//false = arrayOrdinato, true = hashConcatenamento
 	boolean map = false;
 	
 	static MovidaCore core = new MovidaCore();
+	//funzione che mette un film nella tabella hash
 	public void put_in_hash(Movie value) {
 		int index = value.getYear()%ARR_SIZE;
 		LinkedList<oggettoHash> oggetti = arrayhash[index];
 		if(oggetti == null) {
             oggetti = new LinkedList<oggettoHash>();
             oggettoHash item = new oggettoHash(value, value.getYear());
-            /*item.chiave = value.getYear();
-            item.valore = new Movie(value.getTitle(), value.getYear(), value.getVotes(), value.getCast(), value.getDirector());
- */
             oggetti.add(item);
             arrayhash[index] = oggetti;
             
@@ -1565,27 +1564,5 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		
 	}
 }
-	
-	
-	
-	public static void main(String[] args) throws IOException {
-		File f = new File("src/movida/bennatideluise/fileprova.txt");
-		File f1 = new File("src/movida/bennatideluise/fileprova2.txt");
-		core.setMap(MapImplementation.HashConcatenamento);
-		core.loadFromFile(f1);
-		//core.saveToFile(f);
-		//core.clear();
-		Movie[] test = core.getAllMovies();
-		core.saveToFile(f);
-		core.setSort(SortingAlgorithm.QuickSort);
-		/*
-		Person[] attoripiuvotati = core.searchMostActiveActors(5);
-		for (Person a : attoripiuvotati) {
-			System.out.println(a.getName() + " " + a.getMovieStarred());
-		}
-		*/
-		/*Movie[] filmpiurecenti = core.searchMostRecentMovies(10);
-		for (Movie b : filmpiurecenti) System.out.println(b.getTitle() + " " +b.getYear());*/
-		
-	}
+
 }
