@@ -54,21 +54,22 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	static MovidaCore core = new MovidaCore();
 	//funzione che mette un film nella tabella hash
 	public void put_in_hash(Movie value) {
-		int index = value.getYear()%ARR_SIZE;
-		LinkedList<oggettoHash> oggetti = arrayhash[index];
-		if(oggetti == null) {
-            oggetti = new LinkedList<oggettoHash>();
-            oggettoHash item = new oggettoHash(value, value.getYear());
-            oggetti.add(item);
-            arrayhash[index] = oggetti;
+		int index = value.getYear()%ARR_SIZE;	//
+		LinkedList<oggettoHash> oggetti = arrayhash[index];	//creo una lista di oggetti hash che contiene l'elemento puntato da index in arrayhash
+		if(oggetti == null) {	//la lista di oggetti hash è vuota
+            oggetti = new LinkedList<oggettoHash>();	//creo una nuova lista di oggetti hash
+            oggettoHash item = new oggettoHash(value, value.getYear());	//creo un nuovo oggetto da inserire nella tabella hash
+            oggetti.add(item);	//aggiungo item alla lista 
+            arrayhash[index] = oggetti;	//inserisco la lista nella cella di arrayhash puntata da index
             
         }
-        else {
-            for(oggettoHash item : oggetti) {
-            	boolean FLAG = true;
-                if(item.chiave == value.getYear() && FLAG == false) {
-                    item.valore = new Movie(value.getTitle(), value.getYear(), value.getVotes(), value.getCast(), value.getDirector());
-                    FLAG = false;
+        else {	//la lista oggetti non è vuota
+            for(oggettoHash item : oggetti) { //scorro la lista oggetti
+            	boolean FLAG = true;	//
+                if(item.chiave == value.getYear() && FLAG == false) {	//controllo se item ha chiave corrispondente a value.getYear() e se FLAG è false
+                    //pongo il valore di item uguale al film passato come parametro nella funzione
+                	item.valore = new Movie(value.getTitle(), value.getYear(), value.getVotes(), value.getCast(), value.getDirector());
+                    FLAG = false;	//
                 }
             }
             oggettoHash item = new oggettoHash(value, value.getYear());
@@ -77,25 +78,26 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
         }
     }
 	
-	 class Grafo{
-		public void createGraph() {
+	 class Grafo{	//classe che definisce le funzioni di costruzione del grafo
+		public void createGraph() {	//funzione che inizializza il grafo
 			Collab = new LinkedList<>();
 		}
 		
-		public ArrayList<Movie> checkMoviestogheter(Person A, Person B) {
-			ArrayList<Movie> movies = new ArrayList<>();
-			if (map==false) {
-				for (Movie m : filmz2) {
+		public ArrayList<Movie> checkMoviestogheter(Person A, Person B) {	//funzione che permette di controllare se e in quali film 2 attori
+																			//hanno collaborato
+			ArrayList<Movie> movies = new ArrayList<>();	//creo un nuovo array di film
+			if (map==false) {		//se map è falso uso l'array ordinato
+				for (Movie m : filmz2) {	//controllo se nel film m è presente l'attore p
 					for (Person p : m.getCast()) {
-						if (A.getName().equals(p.getName())) {
-							movies.add(m);
+						if (A.getName().equals(p.getName())) {	//controllo se l'attore A passato come parametro è anche l'attore p
+							movies.add(m);	//aggiungo il film m all'array di film
 						}
 					}
 				}
-				for (Movie n : movies) {
+				for (Movie n : movies) {	//controllo se nel film m è presente l'attore p
 					for (Person b : n.getCast()) {
-						if (!(B.getName().equals(b.getName()))) {
-							movies.remove(n);
+						if (!(B.getName().equals(b.getName()))) {	//controllo se l'attore A passato come parametro è anche l'attore p
+							movies.remove(n);	//aggiungo il film m all'array di film
 						}
 					}
 				}
