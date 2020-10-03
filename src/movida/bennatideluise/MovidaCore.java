@@ -102,11 +102,13 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 					}
 				}
 			}
-			else {
-				for(int i = 0; i < arrayhash.length; i++ ){
+			else {	//uso la tabella hash
+				for(int i = 0; i < arrayhash.length; i++ ){	//scorro la tebella hash finché non trovo un elemento
 					if(arrayhash[i] != null) {
-						for(int j = 0; j < arrayhash[i].size(); j++) {
-							for(int g = 0; g < arrayhash[i].get(j).getValue().getCast().length; g++) {
+						for(int j = 0; j < arrayhash[i].size(); j++) {	//una volta trovato un elemento scorro la lista di quell'elemento
+							for(int g = 0; g < arrayhash[i].get(j).getValue().getCast().length; g++) {//scorro gli elementi del cast
+								//se l'attore del cast ha lo stesso nome del primo attore passato come parametro allora aggiungo il film a cui
+								//ha partecipato quell'attore nell'array di film
 								if(arrayhash[i].get(j).getValue().getCast()[g].getName().equals(A.getName())) {
 									movies.add(arrayhash[i].get(j).getValue());
 								}
@@ -114,11 +116,13 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 						}
 					}
 				}
-				for(int i = 0; i < arrayhash.length; i++ ){
+				for(int i = 0; i < arrayhash.length; i++ ){	//scorro la tebella hash finché non trovo un elemento
 					if(arrayhash[i] != null) {
-						for(int j = 0; j < arrayhash[i].size(); j++) {
-							for(int g = 0; g < arrayhash[i].get(j).getValue().getCast().length; g++) {
+						for(int j = 0; j < arrayhash[i].size(); j++) {	//una volta trovato un elemento scorro la lista di quell'elemento
+							for(int g = 0; g < arrayhash[i].get(j).getValue().getCast().length; g++) { //scorro gli elementi del cast
+								//se l'attore del cast non ha lo stesso nome del secondo attore passato come parametro allora rimuovo il film 
 								if(!(arrayhash[i].get(j).getValue().getCast()[g].getName().equals(B.getName()))) {
+									//facendo così nell'array movies mi rimarranno solo i film a cui hanno partecipato entrambi
 									movies.remove(arrayhash[i].get(j).getValue());
 								}
 							}
@@ -129,30 +133,31 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			return movies;
 		}
 		
-		public Collaboration createCollab(Person A, Person B) {
-			ArrayList<Movie> moviez = checkMoviestogheter(A, B); 
-			Collaboration cll = new Collaboration(A,B);
-			for (Movie m : moviez) {
+		public Collaboration createCollab(Person A, Person B) {	//funzione che permette di creare una collaborazione
+			ArrayList<Movie> moviez = checkMoviestogheter(A, B); //controlliamo in che film hanno collaborato gli attori
+			Collaboration cll = new Collaboration(A,B);	//creo la collaborazione
+			for (Movie m : moviez) {	//aggiungo alla lista di film della collaborazione i film a cui hanno partecipato entrambi gli attori
 				cll.movies.add(m);
 			}
 			return cll;
 		}
 		
-		public void fillGraph() {
-			 Person[] attori= core.getAllActors();
-			 if(map == false) {
-				 for (Movie m : filmz2) {
-					 for(Person p : m.getCast()) {
-						 ArrayList<Collaboration> collabbe = new ArrayList<>();
-						 for (int i = 0; i < m.getCast().length; i++) {
-							 if (!(p.getName().equals(m.getCast()[i].getName()))) {
+		public void fillGraph() {	//funzione che serve ad inserire tutti gli elementi nel grafo
+			 Person[] attori= core.getAllActors();	//metto in un array tutti gli attori
+			 if(map == false) {	//se map == false allora uso l'array ordinato
+				 for (Movie m : filmz2) {	//scorro l'array dei film
+					 for(Person p : m.getCast()) {	//scorro l'array cast
+						 ArrayList<Collaboration> collabbe = new ArrayList<>();	//creo un array di collaborazioni
+						 for (int i = 0; i < m.getCast().length; i++) {	//scorro il cast
+							//se il nome della persona p è diverso da quello del membro del cast attualmente puntato allora creo una collaborazione
+							//tra di essi e poi la aggiungo all'array di collaborazioni						 
+							 if (!(p.getName().equals(m.getCast()[i].getName()))) {									 
 								 Collaboration coll = createCollab(p, m.getCast()[i]);
-								 collabbe.add(coll);
-								 
+								 collabbe.add(coll);								 
 							 }
 						 }
-						 GraphObject ogg = new GraphObject(p,  collabbe);
-						 Collab.add(ogg);
+						 GraphObject ogg = new GraphObject(p,  collabbe);	//creo un oggetto grafo 
+						 Collab.add(ogg);	//aggiungo al grafo l'oggetto appena creato
 					 }
 				 }
 				 
