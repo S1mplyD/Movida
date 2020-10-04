@@ -1,7 +1,14 @@
 package movida.bennatideluise;
 
 import movida.bennatideluise.MovidaCore;
-//classe per testare le funzioni di MovidaCore
-public class demo {
+
+//classe di test delle funzioni di MovidaCore
+
+public class Demo {
+
+	public static void main(String[] args) {
+		
+
+	}
 
 }
