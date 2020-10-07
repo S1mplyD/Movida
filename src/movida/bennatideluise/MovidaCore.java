@@ -162,18 +162,20 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 				 }
 				 
 			 }
-			 else {
-				 for(int i = 0; i < arrayhash.length; i++ ){
+			 else {	//uso la tabella hash
+				 for(int i = 0; i < arrayhash.length; i++ ){	//scorro la tabella hash finchè non trovo un elemento
 						if(arrayhash[i] != null) {
-							for(int j = 0; j < arrayhash[i].size(); j++) {
-								for(int g = 0; g < arrayhash[i].get(j).getValue().getCast().length; g++) {
-									ArrayList<Collaboration> collabbe = new ArrayList<>();
-									for(int k = 0; k < arrayhash[i].get(j).getValue().getCast().length; k++) {
+							for(int j = 0; j < arrayhash[i].size(); j++) {	//scorro la lista dell'elemento puntato da i
+								for(int g = 0; g < arrayhash[i].get(j).getValue().getCast().length; g++) {	//scorro il cast
+									ArrayList<Collaboration> collabbe = new ArrayList<>();	//creo una nuova collaborazione
+									for(int k = 0; k < arrayhash[i].get(j).getValue().getCast().length; k++) {	//scorro il cast
+										//controllo che la persona puntata da g sia diversa da k, allora creo la collaborazione
 										if(!arrayhash[i].get(j).getValue().getCast()[g].getName().equals(arrayhash[i].get(j).getValue().getCast()[k].getName())) {
 											Collaboration coll = createCollab(arrayhash[i].get(j).getValue().getCast()[g], arrayhash[i].get(j).getValue().getCast()[k]);
-											 collabbe.add(coll);
+											 collabbe.add(coll);	//aggiungo la collaborazione all'array
 										}
 									}
+									//creo un nuovo elemento del grafo e lo aggiungo al grafo esistente
 									GraphObject ogg = new GraphObject(arrayhash[i].get(j).getValue().getCast()[g], collabbe);
 									 Collab.add(ogg);
 								}
@@ -181,15 +183,18 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 						}
 					}
 			 }
-			 removeDoubles(); 
+			 removeDoubles(); 	//funzione che rimuove le collaborazioni doppie uguali (ad esempio se ho una collaborazione tra A e B, 
+			 					//è inutile averne una tra B ed A)
 			 
 		 }
 		
-		public void removeDoubles() {
-			for(int i = 0 ; i < Collab.size(); i++) {
-				if(Collab.get(i) != null) {
+		public void removeDoubles() {	//funzione che rimuove le collaborazioni doppie
+			for(int i = 0 ; i < Collab.size(); i++) {	//scorro gli elementi del grafo
+				if(Collab.get(i) != null) {	//se l'elemento puntato da i non è nullo allora scorro la lista di collaborazioni 
+											//dell'elemento puntato da i
 					for(int j = 0; j < Collab.get(i).collabs.size(); j++) {
-						for(int g = j + 1; g < Collab.get(i).collabs.size(); g++) {
+						for(int g = j + 1; g < Collab.get(i).collabs.size(); g++) {	//partendo dall'elemento j + 1 controllo per ogni collaborazione se 
+							//se ne presenta una con gli stessi attori
 							if(Collab.get(i).collabs.get(j).getActorA().getName() == 
 									Collab.get(i).collabs.get(g).getActorA().getName() &&
 									Collab.get(i).collabs.get(j).getActorB().getName() == 
@@ -199,7 +204,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 									Collab.get(i).collabs.get(g).getActorB().getName() &&
 									Collab.get(i).collabs.get(j).getActorB().getName() == 
 									Collab.get(i).collabs.get(g).getActorA().getName()) {
-								Collab.get(i).collabs.remove(g);
+								Collab.get(i).collabs.remove(g);// se trovo una collaborazione con gli stessi attori allora la rimuovo 
 							}
 						}
 					}
@@ -209,20 +214,21 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		
 		
 	}
-	 public Person[] getCollab(Person act) {	
-			Person[] collt = new Person[100];
-			for(int i = 0; i < Collab.size(); i++) {
+	 public Person[] getCollab(Person act) {	//funzione che permette di prendere le collaborazioni dirette di un attore
+			Person[] collt = new Person[100];	//creo un array temporaneo di persone (e se le persone sono più di 100? da aggiornare con arrayList(?))
+			for(int i = 0; i < Collab.size(); i++) {	//scorro il grafo
 				
-				if(Collab.get(i) != null) {
+				if(Collab.get(i) != null) {	//quando trovo un nodo non nullo controllo che l'attore puntato da i sia lo stesso passato come parametro
 					if(Collab.get(i).actor.getName().equals(act.getName())) {
-						for(int g = 0; g < Collab.get(i).collabs.size();g++){
-							collt[g] = Collab.get(i).collabs.get(g).getActorB();
-						}
+						for(int g = 0; g < Collab.get(i).collabs.size();g++){	//scorro la lista delle collaborazioni
+							collt[g] = Collab.get(i).collabs.get(g).getActorB();	//aggiungo le persone che hanno collaborato con l'attore 
+																					//passato come parametro all'array
+						}	
 					}
 				}
 			}
 			int arr = trimArray(collt);
-			Person[] coll = new Person[arr];
+			Person[] coll = new Person[arr];	//creo l'array finale privo di celle inutilizzate
 			for(int i = 0; i < arr; i ++) {
 				coll[i] = collt[i];
 			}
@@ -230,28 +236,26 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		}
 	 
 	 @Override
-		public Person[] getDirectCollaboratorsOf(Person actor) {
+		public Person[] getDirectCollaboratorsOf(Person actor) { //funzione che permette di prendere le collaborazioni dirette di un attore
 		 	Person[] directColl = getCollab(actor);
 			return directColl;
 		}
 
-
-
 		@Override
-		public Person[] getTeamOf(Person actor) {
-			ArrayList<Person> teamt = new ArrayList<>();
-			Person[] directColl = getCollab(actor);
-			teamt.add(actor);
-			for(int i = 0; i < directColl.length; i++) {
+		public Person[] getTeamOf(Person actor) {	//funzione che permette di ritornare un team di attori
+			ArrayList<Person> teamt = new ArrayList<>(); //creo un array temporaneo dove mettere i membri del team
+			Person[] directColl = getCollab(actor);	//prendo i collaboratiri diretti dell'attore passato come riferimento
+			teamt.add(actor);	//aggiungo al team l'attore passato come riferimento
+			for(int i = 0; i < directColl.length; i++) {	//aggiungo gli altri attori che hanno collaborato direttamente 
 				teamt.add(directColl[i]);
 			}
-			for(int i = 1; i < directColl.length; i ++) {
+			for(int i = 1; i < directColl.length; i ++) {	//prendo gli attori che hanno collaborato indirettamente
 				Person[] tmp = getCollab(directColl[i]);
 				for(int j = 0; j < tmp.length; j++) {
 					teamt.add(tmp[j]);
 				}
 			}
-			for(int i = 0; i < teamt.size(); i++) {
+			for(int i = 0; i < teamt.size(); i++) {	//rimuovo gli attori presenti più di una volta dall'array temporaneo
 				for(int j = i + 1; j < teamt.size(); j++) {
 					if(teamt.get(i).getName().equals(teamt.get(j).getName())){
 						teamt.remove(j);
@@ -260,7 +264,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 				
 			}
 			
-			Person[] team = new Person[teamt.size()];
+			Person[] team = new Person[teamt.size()];	//creo l'array da ritornare, che avrà dimensione esatta dei componenti del team
 			for(int i = 0; i < teamt.size(); i ++) {
 				team[i] = teamt.get(i);
 			}
@@ -272,8 +276,6 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			Person[] team = getTeamOf(actor);
 			Person[] directColl = getDirectCollaboratorsOf(actor);
 			Collaboration[] icc = new Collaboration[team.length - directColl.length + 1];
-			
-			double score = 0;
 			
 			for(int i = 0; i < directColl.length; i++) {
 				for(int j = 0; j < Collab.size(); j++) {
