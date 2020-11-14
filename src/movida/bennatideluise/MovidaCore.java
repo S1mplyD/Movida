@@ -11,6 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+
+import movida.bennatideluise.MovidaCore.Grafo;
 import movida.commons.*;
 
 
@@ -78,13 +80,14 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
         }
     }
 	
-	 class Grafo{	//classe che definisce le funzioni di costruzione del grafo
+	  class Grafo{	//classe che definisce le funzioni di costruzione del grafo
 		public void createGraph() {	//funzione che inizializza il grafo
 			Collab = new LinkedList<>();
 		}
 		
 		public ArrayList<Movie> checkMoviestogheter(Person A, Person B) {	//funzione che permette di controllare se e in quali film 2 attori
 																			//hanno collaborato
+			boolean Flag = false;
 			ArrayList<Movie> movies = new ArrayList<>();	//creo un nuovo array di film
 			if (map==false) {		//se map è falso uso l'array ordinato
 				for (Movie m : filmz2) {	//controllo se nel film m è presente l'attore p
@@ -94,13 +97,26 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 						}
 					}
 				}
-				for (Movie n : movies) {	//controllo se nel film m è presente l'attore p
-					for (Person b : n.getCast()) {
-						if (!(B.getName().equals(b.getName()))) {	//controllo se l'attore A passato come parametro è anche l'attore p
-							movies.remove(n);	//aggiungo il film m all'array di film
-						}
+				ArrayList<Movie> tmp = movies;
+				for(int i = 0; i < movies.size(); i++) {
+					for(int j = 0; j < movies.get(i).getCast().length; j++) {
+						if((B.getName().equals(tmp.get(i).getCast()[j].getName()))) {
+							Flag = true;
+						}						
+					}
+					if(Flag == false) {
+						movies.remove(movies.get(i));
 					}
 				}
+				
+				
+				/*for (Movie n : movies) {	
+					for (Person b : n.getCast()) {
+						if (!(B.getName().equals(b.getName()))) {	
+							movies.remove(n);	
+						}
+					}
+				}*/
 			}
 			else {	//uso la tabella hash
 				for(int i = 0; i < arrayhash.length; i++ ){	//scorro la tebella hash finché non trovo un elemento
@@ -142,8 +158,8 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			return cll;
 		}
 		
-		public void fillGraph() {	//funzione che serve ad inserire tutti gli elementi nel grafo
-			 Person[] attori= core.getAllActors();	//metto in un array tutti gli attori
+		public void fillGraph(Movie[] films) {	//funzione che serve ad inserire tutti gli elementi nel grafo
+			 Person[] attori= core.getAllActors(films);	//metto in un array tutti gli attori
 			 if(map == false) {	//se map == false allora uso l'array ordinato
 				 for (Movie m : filmz2) {	//scorro l'array dei film
 					 for(Person p : m.getCast()) {	//scorro l'array cast
@@ -215,15 +231,17 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		
 	}
 	 public Person[] getCollab(Person act) {	//funzione che permette di prendere le collaborazioni dirette di un attore
-			Person[] collt = new Person[100];	//creo un array temporaneo di persone (e se le persone sono più di 100? da aggiornare con arrayList(?))
+			Person[] collt = new Person[100];//creo un array temporaneo di persone (e se le persone sono più di 100? da aggiornare con arrayList(?))
+			int lastindex = 0;
 			for(int i = 0; i < Collab.size(); i++) {	//scorro il grafo
-				
+			
 				if(Collab.get(i) != null) {	//quando trovo un nodo non nullo controllo che l'attore puntato da i sia lo stesso passato come parametro
 					if(Collab.get(i).actor.getName().equals(act.getName())) {
 						for(int g = 0; g < Collab.get(i).collabs.size();g++){	//scorro la lista delle collaborazioni
-							collt[g] = Collab.get(i).collabs.get(g).getActorB();	//aggiungo le persone che hanno collaborato con l'attore 
-																					//passato come parametro all'array
-						}	
+							collt[lastindex] = Collab.get(i).collabs.get(g).getActorB();	//aggiungo le persone che hanno collaborato con l'attore 
+																					//passato come parametro all'array							
+							lastindex ++;
+						}						
 					}
 				}
 			}
@@ -255,18 +273,31 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 					teamt.add(tmp[j]);
 				}
 			}
-			for(int i = 0; i < teamt.size(); i++) {	//rimuovo gli attori presenti più di una volta dall'array temporaneo
-				for(int j = i + 1; j < teamt.size(); j++) {
-					if(teamt.get(i).getName().equals(teamt.get(j).getName())){
-						teamt.remove(j);
+			Person[] tmp = new Person[teamt.size()];
+			for(int i = 0; i < teamt.size(); i++) {
+				tmp[i] = teamt.get(i);
+			}
+			ArrayList<Integer> index = new ArrayList<>();		
+			//rimuovo gli attori presenti più di una volta dall'array temporaneo
+			for(int i = 0; i < tmp.length; i++) {	
+				for(int j = i + 1; j < tmp.length; j++) {
+					if(tmp[i].getName().equals(tmp[j].getName())){
+						index.add(j);
 					}
 				}
-				
 			}
-			
-			Person[] team = new Person[teamt.size()];	//creo l'array da ritornare, che avrà dimensione esatta dei componenti del team
-			for(int i = 0; i < teamt.size(); i ++) {
-				team[i] = teamt.get(i);
+			for(int j = 0; j < index.size(); j++) {
+				tmp[index.get(j)] = null;
+			}
+			int ind = trimArray(tmp);		
+			//creo l'array da ritornare, che avrà dimensione esatta dei componenti del team
+			Person[] team = new Person[ind];
+			int jex = 0;
+			for(int i = 0; i < tmp.length; i ++) {
+				if(tmp[i] != null) {
+					team[jex] = tmp[i];
+					jex++;
+				}
 			}
 			return team;
 		}	
@@ -372,6 +403,15 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 				}
 				Movie film = new Movie(title, year,  votes, cast2, director);
 				filmz[filmIndex] = film;
+				Integer arr = trimArrayFilmz(filmz);
+				filmz2 = new Movie[arr];
+				int index = 0;
+				for(Movie i : filmz) {
+					if(i != null) {
+						filmz2[index] = i;
+						index++;
+					}
+				}
 			}
 			else if (map == true) {
 				String title = null;
@@ -441,8 +481,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 	
 	@Override
-	public void saveToFile(File f) throws MovidaFileException {
-		// TODO Auto-generated method stub
+	public void saveToFile(File f) throws MovidaFileException {	
 		try {
 			if(map == false) {
 				FileWriter writer = new FileWriter(f);
@@ -548,8 +587,8 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	public void clear() {
 		if (map == false){
 			Movie[] clear = new Movie[0];
-			filmz = clear;//new Movie(null, null, null, null, null);
-			filmz2 = clear;//new Movie(null, null, null, null, null);
+			filmz = clear;
+			filmz2 = clear;
 		}
 		else {
 			LinkedList<oggettoHash>[] clear = new LinkedList[0];
@@ -1225,13 +1264,13 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		
 	}
 
-    public int countActors() {
+    public int countActors(Movie[] films) {
 		if(map == false) {
 			Boolean Flag = false;
 			List<String> persone = new ArrayList<>();			
-			for(int i = 0; i < filmz2.length; i++) {
-				for(int j = 0; j < filmz2[i].getCast().length; j++) {
-					persone.add(filmz2[i].getCast()[j].getName());
+			for(int i = 0; i < films.length; i++) {
+				for(int j = 0; j < films[i].getCast().length; j++) {
+					persone.add(films[i].getCast()[j].getName());
 				}
 			}
 			int cont = 0;			
@@ -1282,15 +1321,15 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		}
 	}
 	
-	public Person[] getAllActors() {
+	public Person[] getAllActors(Movie[] films) {
 		if(map == false) {
-			int index = countActors();
+			int index = countActors(films);
 			Person[] persone = new Person[index];
 			List<String> personeNomi = new ArrayList<>();
 			
-			for(int i = 0; i < filmz2.length; i++) {
-				for(int j = 0; j < filmz2[i].getCast().length; j++) {
-					personeNomi.add(filmz2[i].getCast()[j].getName());
+			for(int i = 0; i < films.length; i++) {
+				for(int j = 0; j < films[i].getCast().length; j++) {
+					personeNomi.add(films[i].getCast()[j].getName());
 				}
 			}
 			
@@ -1309,7 +1348,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			return persone;
 		}
 		else {
-			int index = countActors();
+			int index = countActors(films);
 			Person[] persone = new Person[index];
 			List<String> personeNomi = new ArrayList<>();
 			for(int i = 0; i < arrayhash.length;i++) {
@@ -1574,4 +1613,26 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 }
 
+	public static void main(String[] args) {
+		MovidaCore core = new MovidaCore();
+		Grafo grafo = core.new Grafo();
+		File f = new File("src/movida/bennatideluise/fileprova2.txt");
+		core.loadFromFile(f);
+		Movie[] films = core.getAllMovies();
+		grafo.createGraph();
+		grafo.fillGraph(films);
+		Person p = core.getPersonByName("Robert De Niro");
+		//for(int i = 0; i < Collab.get(0).collabs.size(); i++)
+			//System.out.println(Collab.get(0).collabs.get(i).getActorB().getName());
+		//for(int i = 0; i < core.getTeamOf(p).length; i++)
+			//System.out.println(core.getTeamOf(p)[i].getName());
+		Collaboration[] costanzo = core.maximizeCollaborationsInTheTeamOf(p);
+		for(int i = 0; i < costanzo.length; i++) {
+			System.out.println(costanzo[i].getScore());
+		}
+		
+	}
+
 }
+
+
