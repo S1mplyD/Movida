@@ -45,16 +45,24 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 
 	static LinkedList<GraphObject> Collab;	//Grafo delle collaborazioni
 	public static final int ARR_SIZE = 10;	
-	Movie[] filmz = new Movie[ARR_SIZE];	//array di film iniziale
-	LinkedList<oggettoHash>[] arrayhash = new LinkedList[ARR_SIZE];	//tabella hash di film
-	Movie[] filmz2 = null;	//array di film trimmato
+	public Movie[] filmz = new Movie[ARR_SIZE];	//array di film iniziale
+	public LinkedList<oggettoHash>[] arrayhash = new LinkedList[ARR_SIZE];	//tabella hash di film
+	public Movie[] filmz2 = null;	//array di film trimmato
 	//false = Bubblesort, true = quicksort
-	boolean algo = false;
+	public boolean algo = false;
 	//false = arrayOrdinato, true = hashConcatenamento
-	boolean map = false;
+	public boolean map = false;
 	
 	static MovidaCore core = new MovidaCore();
 	//funzione che mette un film nella tabella hash
+	public Movie[] getFilmsList() {
+ 		return this.filmz2;
+	}
+	
+	public void setFilmList(Movie[] films) {
+		this.filmz2 = films;
+	}
+	
 	public void put_in_hash(Movie value) {
 		int index = value.getYear()%ARR_SIZE;	//
 		LinkedList<oggettoHash> oggetti = arrayhash[index];	//creo una lista di oggetti hash che contiene l'elemento puntato da index in arrayhash
@@ -97,26 +105,18 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 						}
 					}
 				}
-				ArrayList<Movie> tmp = movies;
+				ArrayList<Movie> tmp = movies;	//creo un array temporaneo che contiene movies
 				for(int i = 0; i < movies.size(); i++) {
 					for(int j = 0; j < movies.get(i).getCast().length; j++) {
-						if((B.getName().equals(tmp.get(i).getCast()[j].getName()))) {
+						if((B.getName().equals(tmp.get(i).getCast()[j].getName()))) {//se il nome dell'attore B è uguale a quello del cast puntato da j
 							Flag = true;
 						}						
 					}
-					if(Flag == false) {
+					if(Flag == false) {	//rimuovo il film se l'attore non è presente
 						movies.remove(movies.get(i));
 					}
 				}
 				
-				
-				/*for (Movie n : movies) {	
-					for (Person b : n.getCast()) {
-						if (!(B.getName().equals(b.getName()))) {	
-							movies.remove(n);	
-						}
-					}
-				}*/
 			}
 			else {	//uso la tabella hash
 				for(int i = 0; i < arrayhash.length; i++ ){	//scorro la tebella hash finché non trovo un elemento
@@ -304,9 +304,9 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		
 		@Override
 		public Collaboration[] maximizeCollaborationsInTheTeamOf(Person actor) {
-			Person[] team = getTeamOf(actor);
-			Person[] directColl = getDirectCollaboratorsOf(actor);
-			Collaboration[] icc = new Collaboration[team.length - directColl.length + 1];
+			Person[] team = getTeamOf(actor);	//prendo il team dell'attore
+			Person[] directColl = getDirectCollaboratorsOf(actor); //prendo i suoi collaboratori diretti
+			Collaboration[] icc = new Collaboration[team.length - directColl.length + 1];	//creo l'icc
 			
 			for(int i = 0; i < directColl.length; i++) {
 				for(int j = 0; j < Collab.size(); j++) {
@@ -340,7 +340,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			
 		
 	@Override
-	public void loadFromFile(File f) throws MovidaFileException {
+	public void loadFromFile(File f) throws MovidaFileException {	//funzione per caricare i dati da file
 		//Creo il film
 		try {
 			if (map == false) {
@@ -353,32 +353,32 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 				
 				int filmIndex = 0;
 				Scanner scanfile = new Scanner(f);
-				while(scanfile.hasNextLine()) {
+				while(scanfile.hasNextLine()) {	//ciclo finché il non finisce
 					String line = scanfile.nextLine();
-					if(!line.equals("")) {
-						if(line.contains("Title: ")) {
+					if(!line.equals("")) {	//controllo quando si presenta una riga vuota (vuol dire che il film è finito)
+						if(line.contains("Title: ")) {	//se la linea contiene "Title" allora rimuovo "Title"
 							line = line.replaceAll("Title: ", "");
 							title = line;
 						}
-						if(line.contains("Year: ")) {
+						if(line.contains("Year: ")) {	//se la linea contiene "Year" allora rimuovo "Tear"
 							line = line.replaceAll("Year: ", "");
 							year = Integer.parseInt(line);		
 						}
-						if(line.contains("Director: ")) {
+						if(line.contains("Director: ")) {	//se la linea contiene "Director" allora rimuovo "Title"
 							line = line.replaceAll("Director: ", "");
 							director = new Person(line);		
 						}
 						
-						if(line.contains("Cast: ")) {
+						if(line.contains("Cast: ")) {	//se la linea contiene "Cast" allora rimuovo "Cast"
 							line = line.replaceAll("Cast: ", "");
 							String[] linearr = null;
-							linearr = line.split(", ");
+							linearr = line.split(", "); //pongo nell'array gli attori
 							cast = new Person[20];
 							for(int i = 0; i < linearr.length; i++) {
-								Person actor = new Person(linearr[i]);
-								cast[i] = actor; 
+								Person actor = new Person(linearr[i]); //creo una Person con il nome contenuto in linearr[i]
+								cast[i] = actor; //setto in cast gli attori
 							}
-							Integer arr = trimArray(cast);
+							Integer arr = trimArray(cast); //tolgo le caselle null dal cast
 							cast2 = new Person[arr];
 							int index = 0;
 							for(Person i : cast) {
@@ -388,32 +388,33 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 								}
 							}
 						}
-						if(line.contains("Votes: ")) {
+						if(line.contains("Votes: ")) {//se la linea contiene "Votes" allora rimuovo "Votes"
 							line = line.replaceAll("Votes: ", "");
-							votes = Integer.parseInt(line);		
+							votes = Integer.parseInt(line);	//trasformo la stringa in intero		
 						}
 						
 					}
-					else {
+					else {	//se ho finito di analizzare il film creo un oggeto film con i parametri appena letti da file
 						Movie film = new Movie(title, year,  votes, cast2, director);
-						filmz[filmIndex] = film;
+						this.filmz[filmIndex] = film;	//pongo il film in un array di film
 						filmIndex ++;	
 					}
 					
 				}
 				Movie film = new Movie(title, year,  votes, cast2, director);
-				filmz[filmIndex] = film;
-				Integer arr = trimArrayFilmz(filmz);
-				filmz2 = new Movie[arr];
+				this.filmz[filmIndex] = film;
+				Integer arr = trimArrayFilmz(filmz);	//creo un array di film senza caselle null
+				Movie []tmp = new Movie[arr];
 				int index = 0;
 				for(Movie i : filmz) {
 					if(i != null) {
-						filmz2[index] = i;
+						tmp[index] = i;
 						index++;
 					}
 				}
+				setFilmList(tmp);
 			}
-			else if (map == true) {
+			else if (map == true) {	//funzione uguale a quella sopra, ma per la tabella hash
 				String title = null;
 				Integer year = null;
 				Person director = null;
@@ -481,11 +482,11 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 	
 	@Override
-	public void saveToFile(File f) throws MovidaFileException {	
+	public void saveToFile(File f) throws MovidaFileException {	//funzione per salvare su file
 		try {
 			if(map == false) {
 				FileWriter writer = new FileWriter(f);
-				Integer arr = trimArrayFilmz(filmz);
+				Integer arr = trimArrayFilmz(filmz);	//tolgo le caselle null dall'array di film
 				filmz2 = new Movie[arr];
 				int index = 0;
 				for(Movie i : filmz) {
@@ -495,9 +496,10 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 					}
 				}
 				for(int i = 0; i < filmz2.length ; i++) {
-					if(i >= 1) {
+					if(i >= 1) {	//mette una riga vuota dopo ogni film
 						writer.write("\n" + "\n");
 					}
+					//scrive su file gli attribuiti di ogni film
 					writer.write("Title: " + filmz2[i].getTitle().toString() + "\n");
 					writer.write("Year: " + filmz2[i].getYear().toString() + "\n");
 					writer.write("Director: " + filmz2[i].getDirector().getName().toString() + "\n");
@@ -517,7 +519,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 				}
 				writer.close();
 			}
-			else {
+			else {	//funzione uguale a quella sopra, questa è per la tabella hash
 				FileWriter writer = new FileWriter(f);
 				int contFilm = 0;
 				int totalFilm = countMovies();
@@ -525,7 +527,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 				for(int i = 0; i < arrayhash.length; i++) {
 					
 					if(arrayhash[i] != null) {
-						if(currentFilm != false && contFilm < totalFilm) {
+						if(currentFilm != false && contFilm < totalFilm) {	//mette una riga vuota dopo ogni film
 							writer.write("\n" + "\n");
 							currentFilm = false;
 						}
@@ -563,7 +565,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		
 	}
 	
-	public Integer trimArray(Person[] cast) {
+	public Integer trimArray(Person[] cast) {	//funzione per trimmerare un array di persone
 		int count = 0;
 		for(Person i : cast) {
 			if(i != null) {
@@ -573,7 +575,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		return count;
 	}
 	
-	public Integer trimArrayFilmz(Movie[] filmz) {
+	public Integer trimArrayFilmz(Movie[] filmz) {	//funzione per trimmerare un array di film
 		int count = 0;
 		for(Movie i : filmz) {
 			if(i != null) {
@@ -584,7 +586,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 	
 	@Override
-	public void clear() {
+	public void clear() {	//funzione per svuotare l'array di film o la tebella hash contenente i film
 		if (map == false){
 			Movie[] clear = new Movie[0];
 			filmz = clear;
@@ -598,48 +600,46 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 	
 	@Override
-	public int countMovies() {
+	public int countMovies() {	//funzione per contare i film
 		if(map == false) {
 			int cont = 0;
-			for(int i = 0; i < filmz2.length; i++) {
+			for(int i = 0; i < filmz2.length; i++) {	//ciclo sui titoli e per ogni titolo incremento un contatore
 				if(filmz2[i].getTitle() != null) {
 					cont++;
 				}
 			}
-			return cont;
+			return cont;	//ritorno il contatore
 		}
 		else {
 			int cont = 0;
-			for(int i = 0; i < arrayhash.length; i++) {
+			for(int i = 0; i < arrayhash.length; i++) {//ciclo sulla tabella hash e per ogni valore non nullo della tabella hash incremento un contatore
 				if(arrayhash[i] != null) {
 					for(int j = 0; j < arrayhash[i].size(); j++) {
 						cont ++;
 					}
-				}
-				
+				}				
 			}
-			return cont;
-		}
-		
+			return cont;	//ritorno il contatore
+		}		
 	}
 	
 	@Override
-	public int countPeople() {
+	public int countPeople() {	//funzione per contare le persone (registi + cast)
 		if (map == false) {
 			Boolean Flag = false;
-			List<String> persone = new ArrayList<>();
+			List<String> persone = new ArrayList<>();	//lista di persone
 			
-			for(int i = 0; i < filmz2.length; i++) {
-				persone.add(filmz2[i].getDirector().getName());
-				for(int j = 0; j < filmz2[i].getCast().length; j++) {
-					persone.add(filmz2[i].getCast()[j].getName());
+			for(int i = 0; i < filmz2.length; i++) {	//ciclo sui film
+				persone.add(filmz2[i].getDirector().getName());	//aggiungo il regista del film alla lista
+				for(int j = 0; j < filmz2[i].getCast().length; j++) {	//ciclo sul cast
+					persone.add(filmz2[i].getCast()[j].getName());	//aggiungo gli attori alla lista
 				}
 			}
 			int cont = 0;
 			
-			for(int i = 0; i < persone.size(); i++) {
+			for(int i = 0; i < persone.size(); i++) {	//ciclo la lista di persone e non conto i doppioni
 				
-				for(int j = i + 1; j < persone.size(); j++) {
+				for(int j = i + 1; j < persone.size(); j++) {	
 					if(persone.get(i).equals(persone.get(j))) {
 						Flag = true;
 						break;
@@ -656,7 +656,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			}
 			return cont;
 		}
-		else {
+		else {	//funzione medesima a quella sopra, ma per la tabella hash
 			Boolean Flag = false;
 			List<String> persone = new ArrayList<>();
 			
@@ -693,24 +693,24 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 	
 	@Override
-	public boolean deleteMovieByTitle(String title) {
+	public boolean deleteMovieByTitle(String title) {	//funzione che elimina un film basandosi sul titolo
 		if (map == false) {
 			Boolean Flag = false;
 			List<Movie> filmzcambiato = new ArrayList<>();
 			
 			int cont = 0;
-			for(int i = 0; i < filmz2.length; i++) {
+			for(int i = 0; i < filmz2.length; i++) {	//inserisco tutti i film in una lista
 				filmzcambiato.add(filmz2[i]);
 			}
-			for(int i = 0; i < filmzcambiato.size(); i++) {
+			for(int i = 0; i < filmzcambiato.size(); i++) {	//scorro la lista e cerco il film con titolo uguale al parametro passato
 				if(filmzcambiato.get(i).getTitle().equals(title)){
 					filmzcambiato.remove(i);
-					cont ++;
+					cont ++;	//incremento il contatore che servirà per ridimensionare l'array di film
 					Flag = true;
 					}
 				}
-			filmz2 = new Movie[filmz2.length - cont];
-			for(int i = 0; i < filmz2.length; i++) {
+			filmz2 = new Movie[filmz2.length - cont];	//creo il nuovo array di film
+			for(int i = 0; i < filmz2.length; i++) {	//inserisco i film della lista nell'array di film
 				filmz2[i] = filmzcambiato.get(i);
 			}
 			if(Flag == false) {
@@ -718,7 +718,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			}
 			return true;
 		}
-		else {
+		else {	//funzione medesima a quella sopra, ma per la tabella hash
 			Boolean Flag = false;			
 			for (int i = 0; i < arrayhash.length; i++) {
 				if (arrayhash[i] != null) {
@@ -740,23 +740,23 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 	
 	@Override
-	public Movie getMovieByTitle(String title) {
+	public Movie getMovieByTitle(String title) {	//funzione che ritorna un film basandosi sul titolo passato per parametro
 		
 		if(map == false) {
 			int index = -1;
-			for(int i = 0; i < filmz2.length; i++) {
+			for(int i = 0; i < filmz2.length; i++) {	//ciclo l'array di film, se trovo il film che sto cercando pongo index = i
 				if(filmz2[i].getTitle().equals(title)) {
 					index = i;
 				}
 			}
-			if(index == -1) {
+			if(index == -1) {	//se alla fine del controllo index è uguale a -1 allora il film non esiste
 				System.out.println("film non esistente");
 				Movie vuoto = new Movie(null,null,null,null,null);
 				return vuoto;
 			}
 			return filmz2[index];
 		}
-		else {
+		else {	//funzione medesima a quella sopra, ma per la tabella hash
 			int arrayindex = -1, listindex = -1;
 			for(int i = 0; i < arrayhash.length; i++) {
 				if(arrayhash[i] != null) {
@@ -779,37 +779,37 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 	
 	@Override
-	public Person getPersonByName(String name) {
+	public Person getPersonByName(String name) {	//funzione che ritorna una persona in base al nome passato come paramentro
 		if(map == false) {
 			List<String> persone = new ArrayList<>();
 			
-			for(int i = 0; i < filmz2.length; i++) {
+			for(int i = 0; i < filmz2.length; i++) {	//ciclo i film e aggiungo ad una lista di persone tutte le persone dei film
 				persone.add(filmz2[i].getDirector().getName());
 				for(int j = 0; j < filmz2[i].getCast().length; j++) {
 					persone.add(filmz2[i].getCast()[j].getName());
 				}
 			}
 			Person persona = null;
-			for(int i = 0; i < persone.size(); i++) {
+			for(int i = 0; i < persone.size(); i++) {	//cerco nella lista la persona che ha come nome il parametro passato alla funzione
 				if(persone.get(i).equals(name)) {
 					persona = new Person(persone.get(i));
 				}
 			}
 			return persona;
 		}
-		else {
+		else {	
 			boolean Flag = false;
 			int indexarray = -1, indexlist = -1, indexcast = -1;
-			for (int i = 0; i < arrayhash.length; i++) {
-				if(arrayhash[i] != null) {
+			for (int i = 0; i < arrayhash.length; i++) {	//ciclo la tabella hash
+				if(arrayhash[i] != null) {	//se è presente un elemento ciclo la lista appartenente a quell'elemento
 					for(int j = 0; j < arrayhash[i].size(); j++) {
-						if(arrayhash[i].get(j).getValue().getDirector().equals(name)) {
+						if(arrayhash[i].get(j).getValue().getDirector().equals(name)) {//se il parametro viene trovato tra i registri mi salvo gli indici
 							indexarray = i; 
 							indexlist = j;
 							Flag = false;
 						}
 							
-						else {
+						else {//altrimenti cerco la persona tra il cast e mi salvo gli indici
 							for(int g = 0; g < arrayhash[i].get(j).getValue().getCast().length; g++) {
 								if(arrayhash[i].get(j).getValue().getCast()[g].getName().equals(name)) {
 									indexarray = i;
@@ -823,13 +823,13 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 					}
 				}
 			}
-			if (Flag == false && indexarray != -1 && indexlist != -1){
+			if (Flag == false && indexarray != -1 && indexlist != -1){ //ritorno il regista
 				return arrayhash[indexarray].get(indexlist).getValue().getDirector();
 			}
-			else if(Flag == true && indexarray != -1 && indexlist != -1 && indexcast != -1){
+			else if(Flag == true && indexarray != -1 && indexlist != -1 && indexcast != -1){//ritorno l'attore
 				return arrayhash[indexarray].get(indexlist).getValue().getCast()[indexcast];
 			}
-			else {
+			else {//non esiste una persona con quel nome
 				System.out.println("nessuna persona con questo nome!");
 				Person vuoto = new Person(null);
 				return vuoto;
@@ -840,13 +840,13 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 	
 	@Override
-	public Movie[] getAllMovies() {
+	public Movie[] getAllMovies() {	//funzione che ritorna tutti i film
 		if(map == false)
-			return filmz2;
+			return filmz2;	//ritorno l'array di film
 		else {
 			int moviecounter = 0;
-			Movie[] moviearray = new Movie[core.countMovies()];
-			for(int i = 0; i < arrayhash.length; i++) {
+			Movie[] moviearray = new Movie[countMovies()];
+			for(int i = 0; i < arrayhash.length; i++) {	//inserisco tutti i film della tabella hash in un array e lo ritorno
 				if(arrayhash[i]!= null) {
 					for(int j = 0; j < arrayhash[i].size(); j++) {
 						moviearray[moviecounter] = arrayhash[i].get(j).getValue();
@@ -859,20 +859,20 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 	
 	@Override
-	public Person[] getAllPeople() {
+	public Person[] getAllPeople() {	//funzione che ritorna tutte le persone
 		if(map == false) {
-			int index = countPeople();
-			Person[] persone = new Person[index];
+			int index = countPeople();	//conto tutte le persone
+			Person[] persone = new Person[index];	//creo un array di persone
 			List<String> personeNomi = new ArrayList<>();
 			
-			for(int i = 0; i < filmz2.length; i++) {
+			for(int i = 0; i < filmz2.length; i++) {	//ciclo tutti i film e aggiungo i nomi delle persone nella liste dei nomi
 				personeNomi.add(filmz2[i].getDirector().getName());
 				for(int j = 0; j < filmz2[i].getCast().length; j++) {
 					personeNomi.add(filmz2[i].getCast()[j].getName());
 				}
 			}
 			
-			for(int i = 0; i < personeNomi.size(); i++) {
+			for(int i = 0; i < personeNomi.size(); i++) {	//elimino i doppioni
 				
 				for(int j = i + 1; j < personeNomi.size(); j++) {
 					if(personeNomi.get(i).equals(personeNomi.get(j))) {
@@ -880,14 +880,14 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 					}	
 				}
 			}
-			for(int i = 0; i < persone.length; i++) {
+			for(int i = 0; i < persone.length; i++) {	//aggiungo le persone all'array di persone
 				Person persona = new Person(personeNomi.get(i));
 				persone[i] = persona;
 			}
 			return persone;
 		}
-		else {
-			Person[] arraypersone = new Person[core.countPeople()];
+		else {//funzione medesima a quella sopra, ma per la tabella hash
+			Person[] arraypersone = new Person[countPeople()];
 			List<String> personeNomi = new ArrayList<>();
 			for(int i = 0; i < arrayhash.length; i++) {
 				if(arrayhash[i] != null) {
@@ -919,23 +919,23 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	
 
 	@Override
-	public Movie[] searchMoviesByTitle(String title) {
+	public Movie[] searchMoviesByTitle(String title) {	//funzione che cerca un film che ha il titolo che contiene la stringa passata come parametro
 		if(map  == false) {
 			List<Movie> filmzsearchati = new ArrayList<>();
-			for (Movie i : filmz2) {
+			for (Movie i : filmz2) {	//scorro i film e controllo se uno di loro contiene la stringa passata come parametro
 				if (i.getTitle().contains(title)) {
 					filmzsearchati.add(i);
 				}
 			}
 			int index = 0;
-			Movie[] filmzsearchati2 = new Movie[filmzsearchati.size()];
-			for (Movie a : filmzsearchati) {
+			Movie[] filmzsearchati2 = new Movie[filmzsearchati.size()];	//creo l'array di dimensione di filmzsearchati
+			for (Movie a : filmzsearchati) {	//inserisco nell'array i film
 					filmzsearchati2[index] = a;
 					index++;
 			}
 			return filmzsearchati2;
 		}
-		else {
+		else {//funzione medesima a quella sopra, ma per la tabella hash
 			List<Movie> filmzsearchati = new ArrayList<>();
 			for(int i = 0; i < arrayhash.length; i++) {
 				if(arrayhash[i] != null) {
@@ -956,23 +956,23 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 
 	@Override
-	public Movie[] searchMoviesInYear(Integer year) {
+	public Movie[] searchMoviesInYear(Integer year) {	//funzione che ritorna i film rilasciati in un determinato anno
 		if(map == false) {
 			List<Movie> filmzsearchati = new ArrayList<>();
-			for (Movie i : filmz2) {
-				if (i.getYear().equals(year)) {
-					filmzsearchati.add(i);
+			for (Movie i : filmz2) {	//scorro l'array di film
+				if (i.getYear().equals(year)) {	//controllo se il film puntato è stato prodotto nell'anno interessato
+					filmzsearchati.add(i);	//aggiungo il film ad una lista
 				}
 			}
 			int index = 0;
-			Movie[] filmzsearchati2 = new Movie[filmzsearchati.size()];
-			for (Movie a : filmzsearchati) {
+			Movie[] filmzsearchati2 = new Movie[filmzsearchati.size()];	//creo un array che ha come dimensione la lunghezza della lista
+			for (Movie a : filmzsearchati) {	//inserisco i film della lista in un array
 					filmzsearchati2[index] = a;
 					index++;
 				}
 			return filmzsearchati2;
 		}
-		else {
+		else {//funzione medesima a quella sopra, ma per la tabella hash
 			List<Movie> filmzsearchati = new ArrayList<>();
 			for(int i = 0; i < arrayhash.length; i++) {
 				if(arrayhash[i] != null) {
@@ -993,23 +993,23 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 
 	@Override
-	public Movie[] searchMoviesDirectedBy(String name) {
+	public Movie[] searchMoviesDirectedBy(String name) {	//funzione che ritorna i film diretti da un certo regista
 		if(map == false) {
-			List<Movie> filmzsearchati = new ArrayList<>();
-			for (Movie i : filmz2) {
+			List<Movie> filmzsearchati = new ArrayList<>();	
+			for (Movie i : filmz2) {	//scorro la lista dei film e controllo se è stato diretto dal regista interessato
 				if (i.getDirector().getName().equals(name)) {
-					filmzsearchati.add(i);
+					filmzsearchati.add(i);	//aggiungo i film alla lista
 				}
 			}
-			Movie[] filmzsearchati2 = new Movie[filmzsearchati.size()];
+			Movie[] filmzsearchati2 = new Movie[filmzsearchati.size()];	//creo un array con dimensione della lista di film
 			int index = 0;
-			for (Movie a : filmzsearchati) {
+			for (Movie a : filmzsearchati) {	//inserisco nell'array i film presenti nella lista
 					filmzsearchati2[index] = a;
 					index++;
 				}
 			return filmzsearchati2;
 		}
-		else {
+		else {//funzione medesima a quella sopra, ma per la tabella hash
 			List<Movie> filmzsearchati = new ArrayList<>();
 			for(int i = 0; i < arrayhash.length; i++) {
 				if(arrayhash[i] != null) {
@@ -1031,25 +1031,25 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 
 	@Override
-	public Movie[] searchMoviesStarredBy(String name) {
+	public Movie[] searchMoviesStarredBy(String name) {	//ritorna i film a cui ha partecipato un certo attore
 		if(map == false) {
 			List<Movie> filmzsearchati = new ArrayList<>();
-			for (Movie i : filmz2) {
+			for (Movie i : filmz2) {	//scorro il cast dei vari film e controllo se l'attore interessato è presente.
 				for (Person k : i.getCast()) {
 				 if (k.getName().equals(name)) {
-					 filmzsearchati.add(i);
+					 filmzsearchati.add(i);	//aggiungo il film alla lista
 				 }
 			    }
 			}
-			Movie[] filmzsearchati2 = new Movie[filmzsearchati.size()];
+			Movie[] filmzsearchati2 = new Movie[filmzsearchati.size()];	//creo un array con dimensione della lista di film
 			int index = 0;
-			for (Movie a : filmzsearchati) {
+			for (Movie a : filmzsearchati) {	//inserisco nell'array i film presenti nella lista
 					filmzsearchati2[index] = a;
 					index++;
 				}
 			return filmzsearchati2;	
 		}
-		else {
+		else {	//funzione medesima a quella sopra, ma per la tabella hash
 			List<Movie> filmzsearchati = new ArrayList<>();
 			for(int i = 0; i < arrayhash.length; i++) {
 				if(arrayhash[i] != null) {
@@ -1074,13 +1074,13 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 
 	@Override
-	public Movie[] searchMostVotedMovies(Integer N) {
+	public Movie[] searchMostVotedMovies(Integer N) {	//funzione che ritorna gli N film con i voti più alti
 		if(map == false){
-			Movie[] filmz3 = filmz2;
-			if(algo == false) {	
-				for (int i = 1; i < filmz3.length; i++) {
+			Movie[] filmz3 = filmz2;	//creo un array di support contenente tutti i film
+			if(algo == false) {	//quicksort
+				for (int i = 1; i < filmz3.length; i++) {	//scorro i film
 					boolean scambi = false;
-					for (int j = 1; j <= filmz3.length - i; j++)
+					for (int j = 1; j <= filmz3.length - i; j++)	//ordino i film utilizzando bubblesort
 						if (filmz3[j - 1].getVotes() < filmz3[j].getVotes()) {
 							Movie tmp = filmz3[j - 1];
 						    filmz3[j - 1] = filmz3[j];
@@ -1089,21 +1089,21 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 						}
 					if (!scambi) break;
 				}
-				if (N >= filmz3.length) return filmz3;
-				else {
-					Movie[] searchedMovies = new Movie[N];
-					for (int k = 0; k< searchedMovies.length; k++) {
+				if (N >= filmz3.length) return filmz3;	//se N è uguale o superiore al numero di film ritorno l'array di film
+				else {	//altrimenti ritorno solo gli N film con i voti più alti
+					Movie[] searchedMovies = new Movie[N];	//creo un array di dimension N
+					for (int k = 0; k< searchedMovies.length; k++) {	//inserisco i film nell'array
 						searchedMovies[k]=filmz3[k]; 
 					}
 					return searchedMovies;
 				}
 			}
-			else {
-				movieQuickSort(filmz3);
-				if (N >= filmz3.length) return filmz3;
-				else {
-					Movie[] searchedMovies = new Movie[N];
-					for (int k = 0; k< searchedMovies.length; k++) {
+			else {//quicksort
+				movieQuickSort(filmz3);	//ordino i film utilizzando quicksort
+				if (N >= filmz3.length) return filmz3;	//se N è uguale o superiore al numero di film ritorno l'array di film
+				else {	//altrimenti ritorno solo gli N film con i voti più alti
+					Movie[] searchedMovies = new Movie[N];	//creo un array di dimension N
+					for (int k = 0; k< searchedMovies.length; k++) {	//inserisco i film nell'array
 						searchedMovies[k]=filmz3[k]; 
 					}
 					return searchedMovies;
@@ -1111,8 +1111,8 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			
 			}
 		}
-		else {
-			Movie[] filmz3 = new Movie[core.countMovies()];
+		else {	//funzione medesima a quella sopra, ma per la tabella hash
+			Movie[] filmz3 = new Movie[countMovies()];
 			if(algo == false) {
 				int movieindex = 0;
 					//inserisco tutti i film nell'array
@@ -1169,11 +1169,11 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 
 	@Override
-	public Movie[] searchMostRecentMovies(Integer N) {
+	public Movie[] searchMostRecentMovies(Integer N) {	//funzione che ritorna gli N film più recenti
 		if(map == false) {
-			Movie[] filmz3 = filmz2;
-			if(algo == false) {
-				for (int i = 1; i < filmz3.length; i++) {
+			Movie[] filmz3 = filmz2;	//creo un array di supporto che contiene tutti i film 
+			if(algo == false) { //bubblesort
+				for (int i = 1; i < filmz3.length; i++) {	//ordino i film utilizzando il bubblesort in base all'anno
 					boolean scambi = false;
 					for (int j = 1; j <= filmz3.length - i; j++)
 						if (filmz3[j - 1].getYear() < filmz3[j].getYear()) {
@@ -1184,18 +1184,18 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 						}
 					if (!scambi) break;
 				}
-				if (N >= filmz3.length) return filmz3;
-				else {
+				if (N >= filmz3.length) return filmz3;	//se N è maggiore o uguale al numero dei film allora ritorno l'array di film
+				else {	//altrimenti ritorno gli N film più recenti
 					Movie[] searchedMovies = new Movie[N];
 					for (int k = 0; k< searchedMovies.length; k++) {
 						searchedMovies[k]=filmz3[k]; 
 					}
 					return searchedMovies;
 				}
-			}else{
-				movieQuickSort(filmz3);
-				if (N >= filmz3.length) return filmz3;
-				else {
+			}else{//quicksort
+				movieQuickSort(filmz3);	//ordino i film utilizzando il quicksort
+				if (N >= filmz3.length) return filmz3;	//se N è maggiore o uguale al numero dei film allora ritorno l'array di film
+				else {	//altrimenti ritorno gli N film più recenti
 					Movie[] searchedMovies = new Movie[N];
 					for (int k = 0; k< searchedMovies.length; k++) {
 						searchedMovies[k]=filmz3[k]; 
@@ -1204,8 +1204,8 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 				}
 			}
 		}
-		else {
-			Movie[] filmz3 = new Movie[core.countMovies()];
+		else {	//funzione medesima a quella sopra, ma per la tabella hash
+			Movie[] filmz3 = new Movie[countMovies()];
 			if(algo == false) {
 				int movieindex = 0;
 					//inserisco tutti i film nell'array
@@ -1264,17 +1264,17 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		
 	}
 
-    public int countActors(Movie[] films) {
+    public int countActors() {	//funzione che conta tutti gli attori
 		if(map == false) {
 			Boolean Flag = false;
 			List<String> persone = new ArrayList<>();			
-			for(int i = 0; i < films.length; i++) {
-				for(int j = 0; j < films[i].getCast().length; j++) {
-					persone.add(films[i].getCast()[j].getName());
+			for(int i = 0; i < filmz2.length; i++) {	//scorro i film
+				for(int j = 0; j < filmz2[i].getCast().length; j++) {	//scorro il cast del film puntato
+					persone.add(filmz2[i].getCast()[j].getName());	//aggiungo il nome delle persone alla lista persone
 				}
 			}
 			int cont = 0;			
-			for(int i = 0; i < persone.size(); i++) {				
+			for(int i = 0; i < persone.size(); i++) {		//conto gli attori, non contando eventuali doppioni		
 				for(int j = i + 1; j < persone.size(); j++) {
 					if(persone.get(i).equals(persone.get(j))) {
 						Flag = true;
@@ -1290,7 +1290,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			}
 			return cont;
 		}
-		else {
+		else {	//funzione medesima a quella sopra, ma per la tabella hash
 			Boolean Flag = false;
 			List<String> persone = new ArrayList<>();
 			for(int i = 0; i < arrayhash.length;i++) {
@@ -1321,19 +1321,19 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		}
 	}
 	
-	public Person[] getAllActors(Movie[] films) {
-		if(map == false) {
-			int index = countActors(films);
-			Person[] persone = new Person[index];
+	public Person[] getAllActors() {	//funzione che ritorna tutti gli attori
+		if(map == false) {	
+			int index = countActors();	//ritorno il numero di attori
+			Person[] persone = new Person[index];	//creo un array della dimensione del numero di attori
 			List<String> personeNomi = new ArrayList<>();
 			
-			for(int i = 0; i < films.length; i++) {
-				for(int j = 0; j < films[i].getCast().length; j++) {
-					personeNomi.add(films[i].getCast()[j].getName());
+			for(int i = 0; i < filmz2.length; i++) {	//metto in una lista i nomi degli attori
+				for(int j = 0; j < filmz2[i].getCast().length; j++) {
+					personeNomi.add(filmz2[i].getCast()[j].getName());
 				}
 			}
 			
-			for(int i = 0; i < personeNomi.size(); i++) {
+			for(int i = 0; i < personeNomi.size(); i++) {	//tolgo	i doppioni
 				
 				for(int j = i + 1; j < personeNomi.size(); j++) {
 					if(personeNomi.get(i).equals(personeNomi.get(j))) {
@@ -1341,14 +1341,14 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 					}	
 				}
 			}
-			for(int i = 0; i < persone.length; i++) {
+			for(int i = 0; i < persone.length; i++) {	//aggiungo le persone all'array
 				Person persona = new Person(personeNomi.get(i));
 				persone[i] = persona;
 			}
 			return persone;
 		}
-		else {
-			int index = countActors(films);
+		else {//funzione medesima a quella sopra, ma per la tabella hash
+			int index = countActors();
 			Person[] persone = new Person[index];
 			List<String> personeNomi = new ArrayList<>();
 			for(int i = 0; i < arrayhash.length;i++) {
@@ -1378,20 +1378,20 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 	
 	@Override
-	public Person[] searchMostActiveActors(Integer N) {
+	public Person[] searchMostActiveActors(Integer N) {	//funzione che ritorna gli N attori più attivi
 		if(map == false) {
-			Person[] attori = getAllActors(); 
-			for (Person i : attori) {
+			Person[] attori = getAllActors(); //array che contiene tutti gli attori
+			for (Person i : attori) {	//scorro gli attori e controllo quante volte compare il loro nome
 				for (Movie j : filmz2) {
 					for (Person g : j.getCast()) {
 						if (i.getName().equals(g.getName())) i.increaseMovieCount();				
 						}
 				}
 			}
-			if(algo == false) {
+			if(algo == false) {//bubblesort
 				for (int index = 1; index <attori.length; index++) {
 					boolean scambi = false;
-					for (int jdex = 1; jdex <= attori.length - index; jdex++) {
+					for (int jdex = 1; jdex <= attori.length - index; jdex++) {	//ordino gli attori utilizzando il bubblesort
 						if (attori[jdex-1].getMovieStarred() < attori[jdex].getMovieStarred()) {
 							Person tmp = attori[jdex-1];
 							attori[jdex-1] = attori[jdex];
@@ -1401,22 +1401,22 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 					}
 					if (!scambi) break;
 				}
-				Person[] attori2 = new Person[N];
-				for (int kdex = 0; kdex < attori2.length; kdex++) {
+				Person[] attori2 = new Person[N];	//creo un array di dimensione N
+				for (int kdex = 0; kdex < attori2.length; kdex++) {	//inserisco gli N attori all'interno dell'array
 					attori2[kdex]=attori[kdex]; 
 				}
 				return attori2;
 			}
-			else {
-				actorQuickSort(attori);
-				Person[] attori2 = new Person[N];
-				for (int kdex = 0; kdex < attori2.length; kdex++) {
+			else {	//quicksort
+				actorQuickSort(attori);	//ordino gli attori con il quicksort
+				Person[] attori2 = new Person[N]; //creo un array di dimensione N
+				for (int kdex = 0; kdex < attori2.length; kdex++) {	//inserisco gli N attori all'interno dell'array
 					attori2[kdex]=attori[kdex]; 
 				}
 				return attori2;
 			}
 		}
-		else {
+		else {	//funzione medesima a quella sopra, ma per la tabella hash
 			Person[] attori = getAllActors();
 			for(Person g : attori) {
 				for(int i = 0; i < arrayhash.length; i++) {
@@ -1461,29 +1461,29 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		}						
 	}
 	
-	public static void actorQuickSort(Person[] arr) {
+	public static void actorQuickSort(Person[] arr) {	//funzione quicksort per attori
 		actorQuickSortRec(arr, 0, arr.length - 1);
 	}
 	
 	public static int partitionActor(Person[] arr, int low, int high) 
     { 
         Person pivot = arr[low];  
-        int i = (low); // index of smaller element 
+        int i = (low); //indice dell'elemento più piccolo 
         for (int j=low +1; j<= high; j++) 
         { 
-            // If current element is smaller than the pivot 
+            //Se l'elemento corrente è più piccolo del pivot
             if (arr[j].getMovieStarred() > pivot.getMovieStarred()) 
             { 
                 i++; 
   
-                // swap arr[i] and arr[j] 
+                //scambio arr[i] e arr[j]
                 Person temp = arr[i]; 
                 arr[i] = arr[j]; 
                 arr[j] = temp; 
             } 
         } 
   
-        // swap arr[i+1] and arr[high] (or pivot) 
+        //scambio arr[i+1] e arr[high]
         Person temp = arr[i]; 
         arr[i] = arr[low]; 
         arr[low] = temp; 
@@ -1492,20 +1492,14 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
     } 
   
   
-    /* The main function that implements QuickSort() 
-      arr[] --> Array to be sorted, 
-      low  --> Starting index, 
-      high  --> Ending index */
     public static void actorQuickSortRec(Person[] arr, int low, int high) 
     { 
         if (low < high) 
         { 
-            /* pi is partitioning index, arr[pi] is  
-              now at right place */
+        	
             int pi = partitionActor(arr, low, high); 
   
-            // Recursively sort elements before 
-            // partition and after partition 
+            //Ordino ricorsivamente gli elementi 
             actorQuickSortRec(arr, low, pi); 
             actorQuickSortRec(arr, pi+1, high); 
         } 
@@ -1518,22 +1512,22 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	public static int partitionMovie(Movie[] arr, int low, int high) 
     { 
         Movie pivot = arr[low];  
-        int i = (low); // index of smaller element 
+        int i = (low); 
         for (int j=low +1; j<= high; j++) 
         { 
-            // If current element is smaller than the pivot 
+             
             if (arr[j].getYear() > pivot.getYear()) 
             { 
                 i++; 
   
-                // swap arr[i] and arr[j] 
+                 
                 Movie temp = arr[i]; 
                 arr[i] = arr[j]; 
                 arr[j] = temp; 
             } 
         } 
   
-        // swap arr[i+1] and arr[high] (or pivot) 
+        
         Movie temp = arr[i]; 
         arr[i] = arr[low]; 
         arr[low] = temp; 
@@ -1542,45 +1536,39 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
     } 
   
   
-    /* The main function that implements QuickSort() 
-      arr[] --> Array to be sorted, 
-      low  --> Starting index, 
-      high  --> Ending index */
+   
     public static void movieQuickSortRec(Movie[] arr, int low, int high) 
     { 
         if (low < high) 
         { 
-            /* pi is partitioning index, arr[pi] is  
-              now at right place */
+            
             int pi = partitionMovie(arr, low, high); 
-  
-            // Recursively sort elements before 
-            // partition and after partition 
+         
             movieQuickSortRec(arr, low, pi); 
             movieQuickSortRec(arr, pi+1, high); 
         } 
     }
 	
 	@Override
-	public boolean setSort(SortingAlgorithm a) {
-		if(a == SortingAlgorithm.BubbleSort) {
-			if(algo == false)
+	public boolean setSort(SortingAlgorithm a) {	//funzione per selezionare l'algoritmo di ordinamento
+		if(a == SortingAlgorithm.BubbleSort) {	//se il parametro è bubblesort
+			if(algo == false)	//se l'algoritmo è già settato a bubblesort ritorno false
 				return false;
-			else {
+			else {	//altrimenti setto l'algoritmo a false e ritorno true
 				algo = false;
 				return true;
 			}
 				
 		} 
-		else if (a == SortingAlgorithm.QuickSort){
-			if(algo == true)
+		else if (a == SortingAlgorithm.QuickSort){	//se il parametro è quicksort
+			if(algo == true)	//se l'algoritmo è già settato a quicksort ritorno false
 				return false;
-			else {
+			else {	//altrimenti lo setto a true e ritorno true
 				algo = true;
 				return true;
 			}
 		}
-		else
+		else	//se il parametro non è ne bubblesort ne quicksort allora ritorno false e non cambio l'algoritmo
 		{
 			return false;
 		}
@@ -1588,51 +1576,30 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	}
 
 	@Override
-	public boolean setMap(MapImplementation m) {
-		if(m == MapImplementation.ArrayOrdinato) {
-			if(map == false)
+	public boolean setMap(MapImplementation m) {	//funzione per settare il dizionario
+		if(m == MapImplementation.ArrayOrdinato) {	//se il parametro è ArrayOrdinato
+			if(map == false)	//se il dizionario è già settato ad arrayordinato ritorno false
 				return false;
-			else {
+			else {	//altrimenti setto il dizionario ad arrayordinato e ritorno true
 				map = false;
 				return true;
 			}
 				
 		} 
-		else if (m == MapImplementation.HashConcatenamento){
-			if(map == true)
+		else if (m == MapImplementation.HashConcatenamento){	//se il parametro è HashConcatenamento
+			if(map == true)	//se il dizionario è già settato ad HashConcatenamento ritorno false
 				return false;
 			else {
-				map = true;
+				map = true;	//altrimenti setto il dizionario ad HashConcatenamento e ritorno true
 				return true;
 			}
 		}
 		else
 		{
-			return false;
+			return false;	//se il parametro non è ne ArrayOrdinato ne HashConcatenamento allora ritorno false e non cambio il dizionario
 		
-	}
-}
-
-	public static void main(String[] args) {
-		MovidaCore core = new MovidaCore();
-		Grafo grafo = core.new Grafo();
-		File f = new File("src/movida/bennatideluise/fileprova2.txt");
-		core.loadFromFile(f);
-		Movie[] films = core.getAllMovies();
-		grafo.createGraph();
-		grafo.fillGraph(films);
-		Person p = core.getPersonByName("Robert De Niro");
-		//for(int i = 0; i < Collab.get(0).collabs.size(); i++)
-			//System.out.println(Collab.get(0).collabs.get(i).getActorB().getName());
-		//for(int i = 0; i < core.getTeamOf(p).length; i++)
-			//System.out.println(core.getTeamOf(p)[i].getName());
-		Collaboration[] costanzo = core.maximizeCollaborationsInTheTeamOf(p);
-		for(int i = 0; i < costanzo.length; i++) {
-			System.out.println(costanzo[i].getScore());
 		}
 		
 	}
 
 }
-
-
