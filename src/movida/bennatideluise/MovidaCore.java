@@ -158,8 +158,8 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			return cll;
 		}
 		
-		public void fillGraph(Movie[] films) {	//funzione che serve ad inserire tutti gli elementi nel grafo
-			 Person[] attori= core.getAllActors(films);	//metto in un array tutti gli attori
+		public void fillGraph() {	//funzione che serve ad inserire tutti gli elementi nel grafo
+			 Person[] attori= getAllActors();	//metto in un array tutti gli attori
 			 if(map == false) {	//se map == false allora uso l'array ordinato
 				 for (Movie m : filmz2) {	//scorro l'array dei film
 					 for(Person p : m.getCast()) {	//scorro l'array cast
@@ -228,9 +228,8 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			}
 		}
 		
-		
-	}
-	 public Person[] getCollab(Person act) {	//funzione che permette di prendere le collaborazioni dirette di un attore
+		public Person[] getCollab(Person act) {	//funzione che permette di prendere le collaborazioni dirette di un attore
+
 			Person[] collt = new Person[100];//creo un array temporaneo di persone (e se le persone sono più di 100? da aggiornare con arrayList(?))
 			int lastindex = 0;
 			for(int i = 0; i < Collab.size(); i++) {	//scorro il grafo
@@ -252,14 +251,12 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			}
 			return coll;
 		}
-	 
-	 @Override
+		
 		public Person[] getDirectCollaboratorsOf(Person actor) { //funzione che permette di prendere le collaborazioni dirette di un attore
 		 	Person[] directColl = getCollab(actor);
 			return directColl;
 		}
 
-		@Override
 		public Person[] getTeamOf(Person actor) {	//funzione che permette di ritornare un team di attori
 			ArrayList<Person> teamt = new ArrayList<>(); //creo un array temporaneo dove mettere i membri del team
 			Person[] directColl = getCollab(actor);	//prendo i collaboratiri diretti dell'attore passato come riferimento
@@ -301,8 +298,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			}
 			return team;
 		}	
-		
-		@Override
+	 
 		public Collaboration[] maximizeCollaborationsInTheTeamOf(Person actor) {
 			Person[] team = getTeamOf(actor);	//prendo il team dell'attore
 			Person[] directColl = getDirectCollaboratorsOf(actor); //prendo i suoi collaboratori diretti
@@ -337,6 +333,8 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 				}
 			return icc;
 			}
+	  }	 	 	 
+		
 			
 		
 	@Override
@@ -1099,7 +1097,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 				}
 			}
 			else {//quicksort
-				movieQuickSort(filmz3);	//ordino i film utilizzando quicksort
+				movieQuickSortScore(filmz3);	//ordino i film utilizzando quicksort
 				if (N >= filmz3.length) return filmz3;	//se N è uguale o superiore al numero di film ritorno l'array di film
 				else {	//altrimenti ritorno solo gli N film con i voti più alti
 					Movie[] searchedMovies = new Movie[N];	//creo un array di dimension N
@@ -1155,7 +1153,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 						}
 					}
 				}
-				movieQuickSort(filmz3);
+				movieQuickSortScore(filmz3);
 				if (N >= filmz3.length) return filmz3;
 				else {
 					Movie[] searchedMovies = new Movie[N];
@@ -1163,7 +1161,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 						searchedMovies[k]=filmz3[k]; 
 					}
 					return searchedMovies;
-				}		
+				}
 			}	
 		}		
 	}
@@ -1193,7 +1191,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 					return searchedMovies;
 				}
 			}else{//quicksort
-				movieQuickSort(filmz3);	//ordino i film utilizzando il quicksort
+				movieQuickSortYear(filmz3);	//ordino i film utilizzando il quicksort
 				if (N >= filmz3.length) return filmz3;	//se N è maggiore o uguale al numero dei film allora ritorno l'array di film
 				else {	//altrimenti ritorno gli N film più recenti
 					Movie[] searchedMovies = new Movie[N];
@@ -1248,7 +1246,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 						}
 					}
 				}
-				movieQuickSort(filmz3);
+				movieQuickSortYear(filmz3);
 				if (N >= filmz3.length) return filmz3;
 				else {
 					Movie[] searchedMovies = new Movie[N];
@@ -1505,11 +1503,11 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
         } 
     }
     
-    public static void movieQuickSort(Movie[] arr) {
-		movieQuickSortRec(arr, 0, arr.length - 1);
+    public static void movieQuickSortYear(Movie[] arr) {
+		movieQuickSortRecYear(arr, 0, arr.length - 1);
 	}
 	
-	public static int partitionMovie(Movie[] arr, int low, int high) 
+	public static int partitionMovieYear(Movie[] arr, int low, int high) 
     { 
         Movie pivot = arr[low];  
         int i = (low); 
@@ -1535,20 +1533,63 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
         return i; 
     } 
   
-  
-   
-    public static void movieQuickSortRec(Movie[] arr, int low, int high) 
+    public static void movieQuickSortRecYear(Movie[] arr, int low, int high) 
     { 
         if (low < high) 
         { 
             
-            int pi = partitionMovie(arr, low, high); 
+            int pi = partitionMovieYear(arr, low, high); 
          
-            movieQuickSortRec(arr, low, pi); 
-            movieQuickSortRec(arr, pi+1, high); 
+            movieQuickSortRecYear(arr, low, pi); 
+            movieQuickSortRecYear(arr, pi+1, high); 
         } 
     }
 	
+    public static void movieQuickSortScore(Movie[] arr) {
+		movieQuickSortRecScore(arr, 0, arr.length - 1);
+	}
+	
+	public static int partitionMovieScore(Movie[] arr, int low, int high) 
+    { 
+        Movie pivot = arr[low];  
+        int i = (low); 
+        for (int j=low +1; j<= high; j++) 
+        { 
+             
+            if (arr[j].getVotes() > pivot.getVotes()) 
+            { 
+                i++; 
+  
+                 
+                Movie temp = arr[i]; 
+                arr[i] = arr[j]; 
+                arr[j] = temp; 
+            } 
+        } 
+  
+        
+        Movie temp = arr[i]; 
+        arr[i] = arr[low]; 
+        arr[low] = temp; 
+  
+        return i; 
+    } 
+  
+  
+   
+    public static void movieQuickSortRecScore(Movie[] arr, int low, int high) 
+    { 
+        if (low < high) 
+        { 
+            
+            int pi = partitionMovieScore(arr, low, high); 
+         
+            movieQuickSortRecScore(arr, low, pi); 
+            movieQuickSortRecScore(arr, pi+1, high); 
+        } 
+    }
+    
+    
 	@Override
 	public boolean setSort(SortingAlgorithm a) {	//funzione per selezionare l'algoritmo di ordinamento
 		if(a == SortingAlgorithm.BubbleSort) {	//se il parametro è bubblesort
