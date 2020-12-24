@@ -185,9 +185,27 @@ public class demo extends MovidaCore{
 		for (Collaboration i : c) {
 			System.out.println(i.getActorA().getName() + "+" + i.getActorB().getName() + "=" + i.getScore());
 		*/
+		core.loadFromFile(f);
+		grafo.createGraph();
+		grafo.fillGraph();
+		Person p = core.getPersonByName("Robert De Niro");
+		System.out.println("getCollab() => ");
+		Person[] arr = grafo.getDirectCollaboratorsOf(p);
+		for (Person i : arr) {
+			System.out.println(i.getName());
+		}
+		Person[] arr2 = grafo.getTeamOf(p);
+		System.out.println("getTeamOf() => ");
+		for (Person i : arr2) {
+			System.out.println(i.getName());
+		}
+		Collaboration[] c = grafo.maximizeCollaborationsInTheTeamOf(p);
+		System.out.println("maximaziCollaborationsInTheTeamOf() => ");
+		for (Collaboration i : c) {
+			System.out.println(i.getActorA().getName() + "+" + i.getActorB().getName() + "=" + i.getScore());
 		
 		}
 		
 	}
-	
 
+}

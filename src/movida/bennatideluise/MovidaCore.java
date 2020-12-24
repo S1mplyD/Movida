@@ -1,24 +1,15 @@
 package movida.bennatideluise;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
-import movida.bennatideluise.MovidaCore.Grafo;
 import movida.commons.*;
 
-
-import java.util.*;
-
-public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMovidaCollaborations{
+public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig{
 	//oggetto della tabella hash
 	public class oggettoHash{
 			
@@ -88,7 +79,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
         }
     }
 	
-	  class Grafo{	//classe che definisce le funzioni di costruzione del grafo
+	  class Grafo implements IMovidaCollaborations{	//classe che definisce le funzioni di costruzione del grafo
 		public void createGraph() {	//funzione che inizializza il grafo
 			Collab = new LinkedList<>();
 		}
@@ -159,7 +150,6 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 		}
 		
 		public void fillGraph() {	//funzione che serve ad inserire tutti gli elementi nel grafo
-			 Person[] attori= getAllActors();	//metto in un array tutti gli attori
 			 if(map == false) {	//se map == false allora uso l'array ordinato
 				 for (Movie m : filmz2) {	//scorro l'array dei film
 					 for(Person p : m.getCast()) {	//scorro l'array cast
@@ -411,6 +401,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 					}
 				}
 				setFilmList(tmp);
+				scanfile.close();
 			}
 			else if (map == true) {	//funzione uguale a quella sopra, ma per la tabella hash
 				String title = null;
@@ -470,6 +461,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 				}
 				Movie film = new Movie(title, year,  votes, cast2, director);
 				put_in_hash(film);
+				scanfile.close();
 			}
 		}
 		catch (Exception e) {
@@ -586,13 +578,13 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 	@Override
 	public void clear() {	//funzione per svuotare l'array di film o la tebella hash contenente i film
 		if (map == false){
-			Movie[] clear = new Movie[0];
-			filmz = clear;
-			filmz2 = clear;
+			filmz = null;
+			filmz2 = null;
 		}
 		else {
-			LinkedList<oggettoHash>[] clear = new LinkedList[0];
-			arrayhash = clear;
+			for(int i = 0; i < arrayhash.length; i++) {
+				arrayhash[i].clear();
+			}
 		}
 		
 	}
@@ -801,7 +793,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig, IMov
 			for (int i = 0; i < arrayhash.length; i++) {	//ciclo la tabella hash
 				if(arrayhash[i] != null) {	//se è presente un elemento ciclo la lista appartenente a quell'elemento
 					for(int j = 0; j < arrayhash[i].size(); j++) {
-						if(arrayhash[i].get(j).getValue().getDirector().equals(name)) {//se il parametro viene trovato tra i registri mi salvo gli indici
+						if(arrayhash[i].get(j).getValue().getDirector().getName().equals(name)) {//se il parametro viene trovato tra i registri mi salvo gli indici
 							indexarray = i; 
 							indexlist = j;
 							Flag = false;
