@@ -476,6 +476,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig{
 		try {
 			if(map == false) {
 				FileWriter writer = new FileWriter(f);
+				/*
 				Integer arr = trimArrayFilmz(filmz);	//tolgo le caselle null dall'array di film
 				filmz2 = new Movie[arr];
 				int index = 0;
@@ -484,7 +485,7 @@ public class MovidaCore implements IMovidaDB, IMovidaSearch, IMovidaConfig{
 						filmz2[index] = i;
 						index++;
 					}
-				}
+				}*/
 				for(int i = 0; i < filmz2.length ; i++) {
 					if(i >= 1) {	//mette una riga vuota dopo ogni film
 						writer.write("\n" + "\n");
